@@ -2,18 +2,21 @@ import random
 import time
 
 from song import Song
+from file_manager import FileManager
 
 class RadioChannel:
     def __init__(self):
         self.song_pool = []
-        self.vip_requests = []
-        self.vip_plus_requests = []
-
+        
     def load_song_pool(self, file_name):
         with open(file_name, "r") as file:
             for line in file:
                 song = Song.from_string(line)
                 self.song_pool.append(song)
+                
+    def display_song_pool(self):
+        for index, song in enumerate(self.song_pool, start=1):
+            print(f"{index}. {song}")
 
     def play_random_song(self, user_membership):
         random_song = random.choice(self.song_pool)
@@ -59,21 +62,40 @@ class RadioChannel:
         if 1 <= song_number <= len(self.song_pool):
             song = self.song_pool[song_number - 1]
             song.add_comment(comment)
-            with open(f"{song.name.replace(' ', '')}.txt", "a") as file:
-                file.write(f"{comment}\n")
+            FileManager.save_comment_to_file(song, comment)
             print(f"You commented on {song.name}!")
         else:
             print("Invalid song number.")
 
-    def request_song(self, song_name, membership_type):
-        if membership_type == "vip" and len(self.vip_requests) >= 3:
+    def request_song(self, song_name, radio_channel):
+        if self.can_make_request(len(self.requests)):
+            requested_song = radio_channel.get_song_by_name(song_name)
+            if requested_song:
+                print(f"Playing requested song: {requested_song.name} - {requested_song.composer}")
+                # Perform any additional actions for playing the requested song
+                self.requests.append(song_name)
+            else:
+                print("Sorry, the requested song is not available.")
+        else:
             print("Sorry, you have reached the maximum number of requests.")
-            return
-        elif membership_type == "vip+" and len(self.vip_plus_requests) >= 10:
-            print("Sorry, you have reached the maximum number of requests.")
+            
+    def get_song_by_name(self, song_name):
+        for song in self.song_pool:
+            if song.name == song_name:
+                return song
+        return None
 
     def update_song_pool(self):
         # Update the AllSongs.txt file with the updated song pool details
         with open("AllSongs.txt", "w") as file:
             for song in self.song_pool:
                 file.write(f"{song}\n")
+
+    @staticmethod
+    def save_comment_to_file(comment):
+        with open("maviduvar.txt", "a") as file:
+            file.write(f"{comment}\n")
+
+    def play_requested_song(self, song):
+        print(f"Now playing: {song.name} - {song.composer}")
+        # Perform any additional actions for playing the song

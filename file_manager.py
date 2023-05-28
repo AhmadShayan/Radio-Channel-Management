@@ -18,6 +18,6 @@ class FileManager:
 
     @staticmethod
     def save_comment_to_file(song, comment):
-        file_name = f"{song.name.replace(' ', '')}.txt"
-        with open(file_name, "a") as file:
-            file.write(f"{comment}\n")
+        with open("maviduvar.txt", "a") as file:
+            file.write(f"{song.name} - {comment}\n")
+
